@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
+use actix_cors::Cors;
 use actix_session::{SessionMiddleware, storage::RedisSessionStore};
-use actix_web::{App, HttpServer, cookie::Key, middleware::Logger, web};
+use actix_web::{App, HttpServer, cookie::Key, http, middleware::Logger, web};
 use sqlx::postgres::PgPoolOptions;
 
 use crate::{
@@ -29,10 +30,10 @@ async fn main() -> Result<(), std::io::Error> {
         .await
         .expect("Could not establish database connection");
 
-    sqlx::migrate!("./migrations")
-        .run(&db)
-        .await
-        .expect("Failed to run migrations");
+    // sqlx::migrate!("./migrations")
+    //     .run(&db)
+    //     .await
+    //     .expect("Failed to run migrations");
 
     let redis_store = RedisSessionStore::new(&config.redis_url)
         .await
@@ -52,8 +53,16 @@ async fn main() -> Result<(), std::io::Error> {
     });
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
+            .allowed_origin("https://accounts.google.com")
+            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+            .allow_any_header()
+            .supports_credentials();
+
         App::new()
             .wrap(Logger::default())
+            .wrap(cors)
             .wrap(SessionMiddleware::new(
                 redis_store.clone(),
                 secret_key.clone(),
