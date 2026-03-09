@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use actix_session::Session;
 use actix_web::{HttpResponse, Responder, web};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::{auth::providers::OAuthProvider, db::insert_user, session};
@@ -10,6 +10,11 @@ use crate::{auth::providers::OAuthProvider, db::insert_user, session};
 pub struct AuthState {
     pub provider: Arc<dyn OAuthProvider>,
     pub db: PgPool,
+}
+
+#[derive(Serialize)]
+pub struct LoginResponsePayload {
+    redirect_url: String,
 }
 
 #[derive(Deserialize)]
@@ -24,10 +29,16 @@ pub async fn login(state: web::Data<AuthState>, session: Session) -> impl Respon
     if session.insert("oauth_state", &csrf_state).is_err() {
         return HttpResponse::InternalServerError().body("Session error");
     }
+    println!("session inserted oauth_state {}", csrf_state);
 
-    HttpResponse::Found()
-        .append_header(("Location", auth_url))
-        .finish()
+    let payload = LoginResponsePayload {
+        redirect_url: auth_url,
+    };
+
+    match serde_json::to_string(&payload) {
+        Ok(body) => HttpResponse::Ok().body(body),
+        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error"),
+    }
 }
 
 pub async fn callback(
@@ -35,9 +46,14 @@ pub async fn callback(
     params: web::Query<CallbackParams>,
     session: Session,
 ) -> impl Responder {
+    println!("session : {:?}", session.status());
     let expected_state = match session.get::<String>("oauth_state") {
         Ok(Some(s)) => s,
-        _ => return HttpResponse::BadRequest().body("Missing oauth_state"),
+        Ok(None) => return HttpResponse::BadRequest().body("Missing oauth_state none"),
+        Err(e) => {
+            println!("session error: {:?}", e);
+            return HttpResponse::BadRequest().body("Missing oauth_state none");
+        }
     };
     session.remove("oauth_state");
 
@@ -47,7 +63,10 @@ pub async fn callback(
         .await
     {
         Ok(u) => u,
-        Err(e) => return HttpResponse::Unauthorized().body(e.to_string()),
+        Err(e) => {
+            println!("error: {:?}", e);
+            return HttpResponse::Unauthorized().body(e.to_string());
+        }
     };
 
     let user = match insert_user(&state.db, provided_user.email, provided_user.name).await {
@@ -60,7 +79,7 @@ pub async fn callback(
     }
 
     HttpResponse::Found()
-        .append_header(("Location", "/"))
+        .append_header(("Location", "http://localhost:3000/"))
         .finish()
 }
 

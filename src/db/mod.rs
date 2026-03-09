@@ -20,7 +20,7 @@ pub async fn insert_user(pool: &PgPool, email: String, name: String) -> anyhow::
       VALUES ($1, $2)
       ON CONFLICT (email)
       DO UPDATE
-      SET name = EXCLUDED.name, updated_at NOW()
+      SET name = EXCLUDED.name, updated_at = NOW()
       RETURNING *
     "#,
     )

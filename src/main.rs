@@ -2,7 +2,12 @@ use std::sync::Arc;
 
 use actix_cors::Cors;
 use actix_session::{SessionMiddleware, storage::RedisSessionStore};
-use actix_web::{App, HttpServer, cookie::Key, http, middleware::Logger, web};
+use actix_web::{
+    App, HttpServer,
+    cookie::{self, Key},
+    middleware::Logger,
+    web,
+};
 use sqlx::postgres::PgPoolOptions;
 
 use crate::{
@@ -63,13 +68,18 @@ async fn main() -> Result<(), std::io::Error> {
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
-            .wrap(SessionMiddleware::new(
-                redis_store.clone(),
-                secret_key.clone(),
-            ))
+            .wrap(
+                SessionMiddleware::builder(redis_store.clone(), secret_key.clone())
+                    .cookie_same_site(cookie::SameSite::None)
+                    .cookie_secure(true)
+                    .build(),
+            )
             .app_data(auth_state.clone())
-            .service(web::scope("/auth/google").route("/login", web::get().to(login)))
-            .route("/callback", web::get().to(callback))
+            .service(
+                web::scope("/auth/google")
+                    .route("/login", web::get().to(login))
+                    .route("/callback", web::get().to(callback)),
+            )
             .route("/auth/logout", web::get().to(logout))
             .service(
                 web::scope("/api")
