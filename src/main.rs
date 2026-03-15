@@ -35,10 +35,10 @@ async fn main() -> Result<(), std::io::Error> {
         .await
         .expect("Could not establish database connection");
 
-    // sqlx::migrate!("./migrations")
-    //     .run(&db)
-    //     .await
-    //     .expect("Failed to run migrations");
+    sqlx::migrate!("./migrations")
+        .run(&db)
+        .await
+        .expect("Failed to run migrations");
 
     let redis_store = RedisSessionStore::new(&config.redis_url)
         .await
