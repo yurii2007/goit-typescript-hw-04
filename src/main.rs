@@ -84,7 +84,7 @@ async fn main() -> Result<(), std::io::Error> {
             .service(
                 web::scope("/api")
                     .wrap(RequireAuth)
-                    .route("/", web::get().to(async || "success")),
+                    .route("/status", web::get().to(async || "success")),
             )
     })
     .bind("0.0.0.0:8080")?
