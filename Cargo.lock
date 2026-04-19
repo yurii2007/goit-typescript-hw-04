@@ -305,6 +305,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
+name = "api-layer"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-session",
+ "actix-web",
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "dotenv",
+ "futures-util",
+ "oauth2",
+ "redis",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "domain",
+]
+
+[[package]]
 name = "arc-swap"
 version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -712,6 +744,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "uuid",
 ]
 
 [[package]]
@@ -1427,6 +1467,20 @@ dependencies = [
  "hashbrown 0.16.1",
  "serde",
  "serde_core",
+]
+
+[[package]]
+name = "infrastructure"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "app",
+ "async-trait",
+ "chrono",
+ "domain",
+ "sqlx",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]

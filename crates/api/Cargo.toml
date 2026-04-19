@@ -1,9 +1,8 @@
 [package]
-name = "rust_api"
+name = "api-layer"
 version = "0.1.0"
 edition = "2024"
 
-# TODO remove this once migration is complete
 [dependencies]
 actix-web = "4"
 actix-session = { version = "0.11", features = ["redis-session"] }
@@ -27,12 +26,3 @@ thiserror = "1"
 async-trait = "0.1.89"
 futures-util = "0.3.32"
 actix-cors = "0.7.1"
-
-[workspace]
-resolver = "3"
-members = ["crates/domain", "crates/app", "crates/api", "crates/infrastructure"]
-
-[workspace.dependencies]
-domain = { path = "crates/domain" }
-app = { path = "crates/app" }
-infrastructure = { path = "crates/infrastructure" }

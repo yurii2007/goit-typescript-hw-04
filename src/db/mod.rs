@@ -31,9 +31,3 @@ pub async fn insert_user(pool: &PgPool, email: String, name: String) -> anyhow::
 
     Ok(user)
 }
-// id UUID PRIMARY KEY GENERATED DEFAULT gen_random_uuid(),
-// email TEXT NOT NULL UNIQUE,
-// name TEXT NOT NULL,
-// created_at TIMESTAMPZ NOT NULL DEFAULT NOW(),
-// last_login_at TIMESTAMPZ,
-// updated_at TIMESTAMPZ NOT NULL DEFAULT NOW()

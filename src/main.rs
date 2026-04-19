@@ -59,7 +59,8 @@ async fn main() -> Result<(), std::io::Error> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
+            .allowed_origin(&config.client_internal_hostname)
+            .allowed_origin(&config.client_external_hostname)
             .allowed_origin("https://accounts.google.com")
             .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allow_any_header()
