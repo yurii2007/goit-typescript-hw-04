@@ -1,21 +1,16 @@
 [package]
-name = "api-layer"
+name = "api"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+infrastructure.workspace = true
 actix-web = "4"
 actix-session = { version = "0.11", features = ["redis-session"] }
 oauth2 = "4"
 reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sqlx = { version = "0.8.6", features = [
-	"runtime-tokio-native-tls",
-	"postgres",
-	"uuid",
-	"chrono",
-] }
 redis = { version = "0.32.7", features = ["tokio-comp"] }
 tokio = { version = "1", features = ["full"] }
 uuid = { version = "1", features = ["v4", "serde"] }

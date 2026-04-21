@@ -305,7 +305,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "api-layer"
+name = "api"
 version = "0.1.0"
 dependencies = [
  "actix-cors",
@@ -316,12 +316,12 @@ dependencies = [
  "chrono",
  "dotenv",
  "futures-util",
+ "infrastructure",
  "oauth2",
  "redis",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
- "sqlx",
  "thiserror 1.0.69",
  "tokio",
  "uuid",
