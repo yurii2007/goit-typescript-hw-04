@@ -1,8 +1,7 @@
 use anyhow::Result;
-use dotenv::dotenv;
 
 #[derive(Debug)]
-pub struct AppConfig {
+pub struct ApiConfig {
     pub database_url: String,
     pub redis_url: String,
     pub google_client_id: String,
@@ -13,10 +12,8 @@ pub struct AppConfig {
     pub client_external_hostname: String,
 }
 
-impl AppConfig {
+impl ApiConfig {
     pub fn from_env() -> Result<Self> {
-        dotenv().ok();
-
         Ok(Self {
             database_url: std::env::var("DATABASE_URL")?,
             redis_url: std::env::var("REDIS_URL")?,

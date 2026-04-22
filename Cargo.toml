@@ -3,30 +3,16 @@ name = "rust_api"
 version = "0.1.0"
 edition = "2024"
 
-# TODO remove this once migration is complete
 [dependencies]
+api.workspace = true
 actix-web = "4"
-actix-session = { version = "0.11", features = ["redis-session"] }
-oauth2 = "4"
 reqwest = { version = "0.12", features = ["json"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-sqlx = { version = "0.8.6", features = [
-	"runtime-tokio-native-tls",
-	"postgres",
-	"uuid",
-	"chrono",
-] }
-redis = { version = "0.32.7", features = ["tokio-comp"] }
 tokio = { version = "1", features = ["full"] }
-uuid = { version = "1", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15"
 anyhow = "1"
 thiserror = "1"
 async-trait = "0.1.89"
 futures-util = "0.3.32"
-actix-cors = "0.7.1"
 
 [workspace]
 resolver = "3"
@@ -36,3 +22,4 @@ members = ["crates/domain", "crates/app", "crates/api", "crates/infrastructure"]
 domain = { path = "crates/domain" }
 app = { path = "crates/app" }
 infrastructure = { path = "crates/infrastructure" }
+api = { path = "crates/api" }

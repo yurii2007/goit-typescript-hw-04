@@ -1,19 +1,11 @@
 use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware::Logger, web};
-use infrastructure::bootstrap_db;
-
-use crate::config::AppConfig;
 
 mod config;
 
-#[actix_web::main]
-async fn main() -> Result<(), std::io::Error> {
-    let config = AppConfig::from_env().expect("Failed to load config");
+pub use config::ApiConfig;
 
-    let _db = bootstrap_db(&config.database_url)
-        .await
-        .expect("Can not connect to the database");
-
+pub async fn run(config: ApiConfig) -> Result<(), std::io::Error> {
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin(&config.client_internal_hostname)

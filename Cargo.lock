@@ -314,7 +314,6 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
- "dotenv",
  "futures-util",
  "infrastructure",
  "oauth2",
@@ -2247,23 +2246,15 @@ dependencies = [
 name = "rust_api"
 version = "0.1.0"
 dependencies = [
- "actix-cors",
- "actix-session",
  "actix-web",
  "anyhow",
+ "api",
  "async-trait",
- "chrono",
  "dotenv",
  "futures-util",
- "oauth2",
- "redis",
  "reqwest 0.12.28",
- "serde",
- "serde_json",
- "sqlx",
  "thiserror 1.0.69",
  "tokio",
- "uuid",
 ]
 
 [[package]]

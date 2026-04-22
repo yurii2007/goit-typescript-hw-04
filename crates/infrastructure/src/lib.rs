@@ -15,5 +15,5 @@ pub async fn bootstrap_db(database_url: &str) -> Result<Pool<Postgres>, anyhow::
         .await
         .expect("Failed to run migrations");
 
-    return Ok(db);
+    Ok(db)
 }
