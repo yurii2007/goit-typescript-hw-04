@@ -8,8 +8,10 @@ async fn main() -> Result<(), std::io::Error> {
 
     let api_config = ApiConfig::from_env().expect("Failed to load config");
 
-    let db = bootstrap_db(&api_config.database_url).await;
+    let db = bootstrap_db(&api_config.database_url)
+        .await
+        .expect("Failed to connect to database");
+    println!("Connected to the database");
 
-    println!("Connected to the postgres");
-    api::run(api_config).await
+    api::run(api_config, db).await
 }

@@ -1,5 +1,6 @@
 mod features;
 
+pub use features::auth;
 pub use features::user;
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
 

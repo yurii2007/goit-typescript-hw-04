@@ -1,13 +1,11 @@
+use app::auth::AuthProviderPort;
 use async_trait::async_trait;
+use domain::auth::ProviderUser;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope,
     TokenResponse, TokenUrl, basic::BasicClient, reqwest::async_http_client,
 };
 use serde::Deserialize;
-
-use crate::auth::providers::ProviderUser;
-
-use super::OAuthProvider;
 
 pub struct GoogleProvider {
     client: BasicClient,
@@ -15,9 +13,10 @@ pub struct GoogleProvider {
 
 #[derive(Deserialize)]
 struct GoogleUserInfo {
-    sub: String, // Google's unique user ID
+    sub: String,
     email: String,
     name: Option<String>,
+    #[allow(dead_code)]
     picture: Option<String>,
 }
 
@@ -36,7 +35,7 @@ impl GoogleProvider {
 }
 
 #[async_trait]
-impl OAuthProvider for GoogleProvider {
+impl AuthProviderPort for GoogleProvider {
     fn authorization_url(&self) -> (String, String) {
         let (url, state) = self
             .client
@@ -54,7 +53,7 @@ impl OAuthProvider for GoogleProvider {
         code: &str,
         state: &str,
         expected_state: &str,
-    ) -> anyhow::Result<super::ProviderUser> {
+    ) -> anyhow::Result<ProviderUser> {
         if state != expected_state {
             anyhow::bail!("OAuth state mismatch - possible CSRF attack");
         }

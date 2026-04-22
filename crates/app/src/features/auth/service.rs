@@ -25,6 +25,8 @@ impl<A: AuthProviderPort, R: UserRepo> AuthService<A, R> {
         state: &str,
         expected_state: &str,
     ) -> anyhow::Result<User> {
-        todo!("Implement the callback orchestration logic")
+        let provider_user = self.provider.exchange_code(code, state, expected_state).await?;
+        let user = self.user_repo.upsert_user(&provider_user.email, &provider_user.name).await?;
+        Ok(user)
     }
 }

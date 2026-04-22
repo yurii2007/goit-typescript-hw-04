@@ -47,26 +47,26 @@ impl UserRepo for PgUserRepo {
             "#,
         )
         .bind(user_id)
-        .fetch_one(&self.pool)
-        .await
-        .unwrap();
+        .fetch_optional(&self.pool)
+        .await?;
 
-        Ok(Some(row.into()))
+        Ok(row.map(|r| r.into()))
     }
 
     async fn upsert_user(&self, email: &str, name: &str) -> anyhow::Result<User> {
         let row = sqlx::query_as::<_, PgUserRow>(
             r#"
-    INSERT INTO users (email, name)
-    VALUES ($1, $2)
-    RETURNING *
+            INSERT INTO users (email, name)
+            VALUES ($1, $2)
+            ON CONFLICT (email)
+            DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
+            RETURNING *
             "#,
         )
         .bind(email)
         .bind(name)
         .fetch_one(&self.pool)
-        .await
-        .unwrap();
+        .await?;
 
         Ok(row.into())
     }

@@ -39,7 +39,7 @@ where
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-    type Future = LocalBoxFuture<'static, Result<ServiceResponse<EitherBody<B>>, Error>>; // ← explicit, not Self::Response
+    type Future = LocalBoxFuture<'static, Result<ServiceResponse<EitherBody<B>>, Error>>;
 
     forward_ready!(service);
 

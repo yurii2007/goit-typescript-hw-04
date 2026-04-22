@@ -1,28 +1,44 @@
+use std::sync::Arc;
+
 use actix_cors::Cors;
-use actix_web::{App, HttpServer, middleware::Logger, web};
+use actix_session::{SessionMiddleware, storage::RedisSessionStore};
+use actix_web::{App, HttpServer, cookie, middleware::Logger, web};
+use infrastructure::auth::GoogleProvider;
+use infrastructure::user::PgUserRepo;
+use sqlx::PgPool;
+
+use app::auth::AuthService;
 
 mod config;
+mod middleware;
+mod routes;
+mod session;
 
 pub use config::ApiConfig;
 
-pub async fn run(config: ApiConfig) -> Result<(), std::io::Error> {
-    // let redis_store = RedisSessionStore::new(&config.redis_url)
-    //     .await
-    //     .expect("Could not establish connection with Redis");
+use middleware::auth::RequireAuth;
+use routes::auth::{AuthState, callback, login, logout};
 
-    // let secret_key = Key::from(config.session_secret.as_bytes());
-    //
-    // let google_provider = Arc::new(GoogleProvider::new(
-    //     &config.google_client_id,
-    //     &config.google_client_secret,
-    //     &config.google_redirect_uri,
-    // ));
-    //
-    // let auth_state = web::Data::new(AuthState {
-    //     provider: google_provider,
-    //     db: db.clone(),
-    // });
+pub async fn run(config: ApiConfig, db: PgPool) -> Result<(), std::io::Error> {
+    let redis_store = RedisSessionStore::new(&config.redis_url)
+        .await
+        .expect("Could not establish connection with Redis");
+    println!("Connected to redis");
 
+    let secret_key = cookie::Key::from(config.session_secret.as_bytes());
+
+    let google_provider = GoogleProvider::new(
+        &config.google_client_id,
+        &config.google_client_secret,
+        &config.google_redirect_uri,
+    );
+
+    let user_repo = PgUserRepo::new(db);
+    let auth_service = Arc::new(AuthService::new(google_provider, user_repo));
+
+    let auth_state = web::Data::new(AuthState { auth_service, redirect_url: config.client_external_hostname.clone() });
+
+    println!("Starting an app");
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin(&config.client_internal_hostname)
@@ -35,8 +51,24 @@ pub async fn run(config: ApiConfig) -> Result<(), std::io::Error> {
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
-            .service(web::scope("/auth/google"))
-            .service(web::scope("/api").route("/status", web::get().to(async || "success")))
+            .wrap(
+                SessionMiddleware::builder(redis_store.clone(), secret_key.clone())
+                    .cookie_same_site(cookie::SameSite::None)
+                    .cookie_secure(true)
+                    .build(),
+            )
+            .app_data(auth_state.clone())
+            .service(
+                web::scope("/auth/google")
+                    .route("/login", web::get().to(login))
+                    .route("/callback", web::get().to(callback)),
+            )
+            .route("/auth/logout", web::get().to(logout))
+            .service(
+                web::scope("/api")
+                    .wrap(RequireAuth)
+                    .route("/status", web::get().to(async || "success")),
+            )
     })
     .bind("0.0.0.0:8080")?
     .run()

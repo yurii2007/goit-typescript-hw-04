@@ -312,17 +312,13 @@ dependencies = [
  "actix-session",
  "actix-web",
  "anyhow",
- "async-trait",
- "chrono",
+ "app",
+ "domain",
  "futures-util",
  "infrastructure",
- "oauth2",
- "redis",
- "reqwest 0.12.28",
  "serde",
  "serde_json",
- "thiserror 1.0.69",
- "tokio",
+ "sqlx",
  "uuid",
 ]
 
@@ -1477,8 +1473,10 @@ dependencies = [
  "async-trait",
  "chrono",
  "domain",
+ "oauth2",
+ "reqwest 0.12.28",
+ "serde",
  "sqlx",
- "tokio",
  "uuid",
 ]
 
@@ -2067,7 +2065,6 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "ryu",
- "sha1_smol",
  "socket2 0.6.2",
  "tokio",
  "tokio-util",
@@ -2247,15 +2244,9 @@ name = "rust_api"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "anyhow",
  "api",
- "async-trait",
  "dotenv",
- "futures-util",
  "infrastructure",
- "reqwest 0.12.28",
- "thiserror 1.0.69",
- "tokio",
 ]
 
 [[package]]
@@ -2486,12 +2477,6 @@ dependencies = [
  "cpufeatures",
  "digest",
 ]
-
-[[package]]
-name = "sha1_smol"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbfa15b3dddfee50a0fff136974b3e1bde555604ba463834a7eb7deb6417705d"
 
 [[package]]
 name = "sha2"
@@ -3011,19 +2996,7 @@ dependencies = [
  "pin-project-lite",
  "signal-hook-registry",
  "socket2 0.6.2",
- "tokio-macros",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "tokio-macros"
-version = "2.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af407857209536a95c8e56f8231ef2c2e2aff839b22e07a1ffcbc617e9db9fa5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
