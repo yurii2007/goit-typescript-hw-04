@@ -17,3 +17,15 @@ impl From<User> for ApiResponseUser {
     }
   }
 }
+
+#[derive(Serialize, Debug)]
+pub struct AuthStatusResponse {
+  pub data: AuthStatusData,
+  pub status: u16,
+}
+
+#[derive(Serialize, Debug)]
+pub struct AuthStatusData {
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub user: Option<ApiResponseUser>,
+}

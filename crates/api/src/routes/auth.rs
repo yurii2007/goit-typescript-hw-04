@@ -1,14 +1,17 @@
 use std::sync::Arc;
 
 use actix_session::Session;
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{HttpResponse, Responder, cookie::Cookie, web};
 use infrastructure::auth::GoogleProvider;
 use serde::Deserialize;
 
 use app::auth::AuthService;
 use infrastructure::user::PgUserRepo;
 
-use crate::{features::user::ApiResponseUser, session};
+use crate::{
+  features::user::{ApiResponseUser, AuthStatusData, AuthStatusResponse},
+  session,
+};
 
 pub struct AuthState {
   pub auth_service: Arc<AuthService<GoogleProvider, PgUserRepo>>,
@@ -21,29 +24,29 @@ pub struct CallbackParams {
   pub state: String,
 }
 
-pub async fn get_current_user(state: web::Data<AuthState>, session: Session) -> impl Responder {
-  let session_user_id = session::get_user_id(&session);
+pub async fn get_current_user(state: web::Data<AuthState>, session: Session) -> HttpResponse {
+  let Some(user_id) = session::get_user_id(&session) else {
+    return HttpResponse::Unauthorized().json(AuthStatusResponse {
+      data: AuthStatusData { user: None },
+      status: 401,
+    });
+  };
 
-  println!("Session id -> {:?}", session_user_id);
-  match session_user_id {
-    Some(user_id) => {
-      let user = state.auth_service.get_current_user(user_id).await;
-      println!("User -> {:?}", user);
-
-      match user {
-        Ok(Some(user)) => {
-          let user_response = ApiResponseUser::from(user);
-
-          match serde_json::to_string(&user_response) {
-            Ok(response) => HttpResponse::Ok().body(response),
-            Err(_) => HttpResponse::InternalServerError().finish(),
-          }
-        }
-        Ok(None) => HttpResponse::NotFound().finish(),
-        Err(_) => HttpResponse::Unauthorized().finish(),
-      }
-    }
-    None => HttpResponse::Unauthorized().finish(),
+  match state.auth_service.get_current_user(user_id).await {
+    Ok(Some(user)) => HttpResponse::Ok().json(AuthStatusResponse {
+      data: AuthStatusData {
+        user: Some(ApiResponseUser::from(user)),
+      },
+      status: 200,
+    }),
+    Ok(None) => HttpResponse::NotFound().json(AuthStatusResponse {
+      data: AuthStatusData { user: None },
+      status: 404,
+    }),
+    Err(_) => HttpResponse::Unauthorized().json(AuthStatusResponse {
+      data: AuthStatusData { user: None },
+      status: 401,
+    }),
   }
 }
 
@@ -89,7 +92,16 @@ pub async fn callback(
     .finish()
 }
 
-pub async fn logout(session: Session) -> impl Responder {
+pub async fn logout(session: Session) -> HttpResponse {
   session::clear_session(&session);
-  HttpResponse::NoContent().finish()
+
+  let removal_cookie = Cookie::build("id", "")
+    .path("/")
+    .http_only(true)
+    .secure(true)
+    .same_site(actix_web::cookie::SameSite::None)
+    .expires(actix_web::cookie::time::OffsetDateTime::UNIX_EPOCH)
+    .finish();
+
+  HttpResponse::NoContent().cookie(removal_cookie).finish()
 }

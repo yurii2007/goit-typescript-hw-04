@@ -11,10 +11,12 @@ pub async fn bootstrap_db(database_url: &str) -> Result<Pool<Postgres>, anyhow::
     .await
     .expect("Could not establish database connection");
 
+  println!("Running migrations...");
   sqlx::migrate!("../../migrations")
     .run(&db)
     .await
     .expect("Failed to run migrations");
+  println!("Migration run successfully");
 
   Ok(db)
 }

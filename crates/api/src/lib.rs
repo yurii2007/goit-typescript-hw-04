@@ -67,11 +67,11 @@ pub async fn run(config: ApiConfig, db: PgPool) -> Result<(), std::io::Error> {
       .app_data(auth_state.clone())
       .service(
         web::scope("/auth")
-          .route("/", web::get().to(get_current_user))
+          .route("/user", web::get().to(get_current_user))
           .route("/google/login", web::get().to(login))
-          .route("/google/callback", web::get().to(callback)),
+          .route("/google/callback", web::get().to(callback))
+          .route("/logout", web::post().to(logout)),
       )
-      .route("/auth/logout", web::get().to(logout))
       .service(
         web::scope("/api")
           .wrap(RequireAuth)
