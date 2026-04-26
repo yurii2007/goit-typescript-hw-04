@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_session::Session;
 use actix_web::{HttpResponse, Responder, web};
 use infrastructure::auth::GoogleProvider;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use app::auth::AuthService;
 use infrastructure::user::PgUserRepo;
@@ -13,11 +13,6 @@ use crate::session;
 pub struct AuthState {
     pub auth_service: Arc<AuthService<GoogleProvider, PgUserRepo>>,
     pub redirect_url: String,
-}
-
-#[derive(Serialize)]
-pub struct LoginResponsePayload {
-    redirect_url: String,
 }
 
 #[derive(Deserialize)]
@@ -33,14 +28,9 @@ pub async fn login(state: web::Data<AuthState>, session: Session) -> impl Respon
         return HttpResponse::InternalServerError().body("Session error");
     }
 
-    let payload = LoginResponsePayload {
-        redirect_url: auth_url,
-    };
-
-    match serde_json::to_string(&payload) {
-        Ok(body) => HttpResponse::Ok().body(body),
-        Err(_) => HttpResponse::InternalServerError().body("Internal Server Error"),
-    }
+    HttpResponse::Found()
+        .append_header(("Location", auth_url))
+        .finish()
 }
 
 pub async fn callback(
