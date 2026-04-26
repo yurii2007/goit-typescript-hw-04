@@ -1,3 +1,3 @@
 mod repo;
 
-pub use repo::{PgUserRepo};
+pub use repo::PgUserRepo;

@@ -16,3 +16,6 @@ anyhow = "1"
 futures-util = "0.3.32"
 actix-cors = "0.7.1"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "postgres"] }
+
+[lints]
+workspace = true
